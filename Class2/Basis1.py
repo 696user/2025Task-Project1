@@ -1,18 +1,26 @@
 import os
 from openai import OpenAI
 
-api_key = os.getenv("OPENAI_API_KEY")
-base_url = os.getenv("OPENAI_BASE_URL")
+api_key = os.getenv("OPENAI_API_KEY")  #本地运行时，改成自己的 API Key
+base_url = os.getenv("OPENAI_BASE_URL")  # 本地运行时，改成提供商给定的地址
 
 client = OpenAI(api_key=api_key, base_url=base_url)
 
-response = client.chat.completions.create(
-    model="ernie-x1.1-preview",
-    messages=[
-        {"role": "system", "content": "你是一个有用的助手。"},
-        {"role": "user", "content": "你好，AI！"}
-    ],
-    max_tokens=1000
-)
+history = []  #对话历史记录
 
-print(response.choices[0].message.content)
+while True:
+    prompt = input()
+    if not prompt:
+        break  # 输入为空时退出
+
+    history.append({"role": "user", "content": prompt})
+
+    response = client.chat.completions.create(
+        model="ernie-x1.1-preview",
+        messages=history,
+        max_tokens=1000
+    )
+
+    answer = response.choices[0].message.content
+    history.append({"role": "assistant", "content": answer})
+    print(answer)
